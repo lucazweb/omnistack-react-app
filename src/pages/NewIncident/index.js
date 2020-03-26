@@ -1,10 +1,41 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import { FiArrowLeft } from 'react-icons/fi';
 import logoImg from '../../assets/logo.svg';
+import { api } from '../../services/api';
 import './styles.css';
 
-const NewIncident = () => (
+const NewIncident = () => {
+  const ong_id = localStorage.getItem('ong_id');
+  const history = useHistory();
+
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [value, setValue] = useState('');
+  
+  const handleNewIncident = async e => {
+    e.preventDefault();
+    
+    const data = {
+      title,
+      description,
+      value
+    };
+
+    try {
+      await api.post('/incidents', data, {
+        headers: {
+          Authorization: ong_id
+        }
+      });
+      history.push('/profile');
+      console.log('novo caso criado');
+    } catch(err) {
+      console.log(err);
+    }
+  }
+
+  return (
     <div className="new-incident-container">
       <div className="content">
         <section>
@@ -17,15 +48,27 @@ const NewIncident = () => (
           </Link>
         </section>
 
-        <form>
-            <input placeholder="Título do caso"/>
-            <textarea placeholder="Descrição"/>
-            <input placeholder="Valor em Reais"/>
+        <form onSubmit={e => handleNewIncident(e)}>
+            <input 
+              onChange={e => setTitle(e.target.value)}
+              defaultValue={title}
+              placeholder="Título do caso"
+            />
+            <textarea 
+              onChange={e => setDescription(e.target.value)} 
+              defaultValue={description}
+              placeholder="Descrição"
+            />
+            <input 
+              onChange={e => setValue(e.target.value)}
+              defaultValue={value}
+              placeholder="Valor em Reais"
+            />
             <button className="button" type="submit">Cadastrar</button>
-
           </form>        
       </div>
     </div>
 );
+}
 
 export default NewIncident;
